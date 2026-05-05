@@ -33,7 +33,14 @@ const BATTERIES = [
     bmi: { countryCode: 'IN', countryName: 'India', manufacturerId: '088' },
     bds: { capacity: '60 kWh', chemistry: 'NMC', chemistryFull: 'Nickel Manganese Cobalt', voltage: '480 V', origin: 'South Korea', extinguisherClass: 'Class C' },
     bi:  { manufactureDate: '19 September 2024', factoryCode: '1', serialNo: '0355' }
-  }
+  },
+  {
+    id: 'bat-006',
+    bpan: 'KR088 B6FQQKRC 4I1310356',
+    bmi: { countryCode: 'IN', countryName: 'India', manufacturerId: '089' },
+    bds: { capacity: '60 kWh', chemistry: 'NMC', chemistryFull: 'Nickel Manganese Cobalt', voltage: '480 V', origin: 'South Korea', extinguisherClass: 'Class C' },
+    bi:  { manufactureDate: '19 September 2024', factoryCode: '1', serialNo: '0355' }
+  },
 ];
 
 function renderIndex() {
