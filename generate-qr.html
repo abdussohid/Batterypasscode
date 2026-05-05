@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Generate QR Codes — VoltID</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="batteries.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: #f3f3f0;
+      color: #111;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    header {
+      background: #fff;
+      border-bottom: 1px solid #e8e8e5;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+    }
+
+    header span {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: #a8a8a8;
+    }
+
+    .page {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 36px 24px 60px;
+    }
+
+    h1 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin: 0 0 6px;
+    }
+
+    .sub {
+      font-size: 0.85rem;
+      color: #6b6b6b;
+      margin: 0 0 28px;
+    }
+
+    .url-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 36px;
+    }
+
+    .url-row input {
+      flex: 1;
+      padding: 10px 14px;
+      border: 1px solid #e8e8e5;
+      border-radius: 6px;
+      font-size: 0.875rem;
+      font-family: 'Courier New', monospace;
+      color: #111;
+      background: #fff;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .url-row input:focus { border-color: #111; }
+
+    .url-row button {
+      padding: 10px 20px;
+      background: #111;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .url-row button:hover { background: #2d2d2d; }
+
+    .qr-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 20px;
+    }
+
+    .qr-item {
+      background: #fff;
+      border: 1px solid #e8e8e5;
+      border-radius: 10px;
+      padding: 20px 16px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+    }
+
+    .qr-canvas-wrap {
+      width: 160px;
+      height: 160px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .qr-divider {
+      width: 100%;
+      height: 1px;
+      background: #f0f0ed;
+      margin: 14px 0 12px;
+    }
+
+    .qr-bpan {
+      font-family: 'Courier New', monospace;
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: #111;
+      text-align: center;
+      letter-spacing: 0.04em;
+      margin-bottom: 10px;
+      word-break: break-all;
+    }
+
+    .qr-dl {
+      width: 100%;
+      padding: 8px;
+      font-size: 0.78rem;
+      font-weight: 500;
+      font-family: inherit;
+      border: 1px solid #e8e8e5;
+      border-radius: 6px;
+      background: #f9f9f7;
+      color: #334155;
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+      display: block;
+      transition: background 0.15s;
+    }
+
+    .qr-dl:hover { background: #f0f0ed; }
+
+    .hint {
+      font-size: 0.78rem;
+      color: #a8a8a8;
+      margin-top: 28px;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <span>VoltID — QR Generator</span>
+</header>
+
+<div class="page">
+  <h1>Generate QR Codes</h1>
+  <p class="sub">Enter your hosting base URL, then click Generate. Download each QR as a PNG to print or share.</p>
+
+  <div class="url-row">
+    <input type="text" id="baseUrl" placeholder="https://your-domain.com/site" />
+    <button onclick="generate()">Generate</button>
+  </div>
+
+  <div class="qr-grid" id="grid"></div>
+
+  <p class="hint">
+    Each QR code encodes the full URL to that battery's detail page.<br>
+    Right-click a QR image to save it, or use the Download button.
+  </p>
+</div>
+
+<script>
+  const batteries = BATTERIES.map(b => ({ file: `${b.id}.html`, bpan: b.bpan }));
+
+  function generate() {
+    let base = document.getElementById('baseUrl').value.trim().replace(/\/$/, '');
+    if (!base) { alert('Please enter a base URL first.'); return; }
+
+    const grid = document.getElementById('grid');
+    grid.innerHTML = '';
+
+    batteries.forEach((bat, i) => {
+      const url = `${base}/${bat.file}`;
+
+      const item = document.createElement('div');
+      item.className = 'qr-item';
+
+      const wrap = document.createElement('div');
+      wrap.className = 'qr-canvas-wrap';
+      wrap.id = `qr-wrap-${i}`;
+
+      const divider = document.createElement('div');
+      divider.className = 'qr-divider';
+
+      const label = document.createElement('p');
+      label.className = 'qr-bpan';
+      label.textContent = bat.bpan;
+
+      const dlBtn = document.createElement('a');
+      dlBtn.className = 'qr-dl';
+      dlBtn.textContent = 'Download PNG';
+
+      item.appendChild(wrap);
+      item.appendChild(divider);
+      item.appendChild(label);
+      item.appendChild(dlBtn);
+      grid.appendChild(item);
+
+      new QRCode(wrap, {
+        text: url,
+        width: 160,
+        height: 160,
+        colorDark: '#111111',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.M,
+      });
+
+      // Wire download after QR renders (slight delay for canvas paint)
+      setTimeout(() => {
+        const canvas = wrap.querySelector('canvas');
+        if (!canvas) return;
+        dlBtn.href = canvas.toDataURL('image/png');
+        dlBtn.download = `qr-${bat.file.replace('.html', '')}.png`;
+      }, 300);
+    });
+  }
+</script>
+
+</body>
+</html>
