@@ -56,11 +56,11 @@ function renderBattery(id) {
     return;
   }
 
-  document.title = `${bat.bpan} — VoltID`;
+  document.title = `${bat.bpan} — Battery Passcode`;
 
   document.body.innerHTML = `
     <header class="topbar">
-      <a class="topbar-mark" href="index.html"><span class="mark-volt">Volt</span>ID</a>
+      <a class="topbar-mark" href="index.html">Battery Passcode</a>
     </header>
     <main class="page">
       <p class="bpan-label">Battery Pack Aadhaar Number</p>
